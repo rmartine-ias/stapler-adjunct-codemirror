@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CodeMirror 2 Example</title>
+    <link rel="stylesheet" href="src/main/resources/org/kohsuke/stapler/codemirror/lib/codemirror.css" type="text/css">
+    <script src="src/main/resources/org/kohsuke/stapler/codemirror/lib/codemirror.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="src/main/resources/org/kohsuke/stapler/codemirror/theme/default.css" type="text/css">
+    <script src="src/main/resources/org/kohsuke/stapler/codemirror/mode/groovy/groovy.js" type="text/javascript"></script>
+    <script src="prototype.js" type="text/javascript"></script>
+  </head>
+  <body>
+       <form action="script" method="post">
+            <textarea id="script1" name="script" class="script"></textarea>
+                        <div align="right">
+                <input type="submit"
+         name="Run"
+         value="Run"
+         class="submit-button primary" />
+            </div>
+          </form>
+      <script>
+function isGeckoCommandKey() {
+  return Prototype.Browser.Gecko && event.keyCode == 224;
+}
+function isOperaCommandKey() {
+  return Prototype.Browser.Opera && event.keyCode == 17;
+}
+function isWebKitCommandKey() {
+  return (
+    Prototype.Browser.WebKit && (event.keyCode == 91 || event.keyCode == 93)
+  );
+}
+function isCommandKey() {
+  return isGeckoCommandKey() || isOperaCommandKey() || isWebKitCommandKey();
+}
+function isReturnKeyDown() {
+  return event.type == "keydown" && event.keyCode == Event.KEY_RETURN;
+}
+function getParentForm(element) {
+  if (element == null) throw "not found a parent form";
+  if (element instanceof HTMLFormElement) return element;
+
+  return getParentForm(element.parentNode);
+}
+var cmdKeyDown = false;
+        var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("script1"), {
+            mode: "text/x-groovy",
+            lineNumbers: true,
+            matchBrackets: true,
+            onKeyEvent: function (editor, event) {
+              function saveAndSubmit() {
+                editor.save();
+                getParentForm(e).submit();
+                event.stop();
+              }
+
+              // Mac (Command + Enter)
+              if (navigator.userAgent.indexOf("Mac") > -1) {
+                if (event.type == "keydown" && isCommandKey()) {
+                  cmdKeyDown = true;
+                }
+                if (event.type == "keyup" && isCommandKey()) {
+                  cmdKeyDown = false;
+                }
+                if (cmdKeyDown && isReturnKeyDown()) {
+                  saveAndSubmit();
+                  return true;
+                }
+
+                // Windows, Linux (Ctrl + Enter)
+              } else {
+                if (event.ctrlKey && isReturnKeyDown()) {
+                  saveAndSubmit();
+                  return true;
+                }
+              }
+            },
+        });
+      </script>
+  </body
+</html>
